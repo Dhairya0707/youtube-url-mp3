@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube to MP3 Converter - Download MP3 from YouTube</title>
+  <meta name="description" content="Convert and download YouTube videos to MP3 easily with our online converter. Fast and free MP3 downloads from YouTube.">
+  <meta name="robots" content="index, follow">
+
+  <style>
+    body {
+      background: #173f6a;
+      /* Light blue gradient background */
+      text-align: center;
+      font-family: sans-serif;
+    }
+
+    .card {
+      background-color: rgba(255, 255, 255, 0.9);
+      /* Transparent for glass effect */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 15px 30px 10px rgba(0, 0, 255, 0.3), 0 5px 5px rgba(255, 255, 255, 0.5);
+      /* More glowing and elevated shadow */
+      backdrop-filter: blur(5px);
+      /* Glass effect blur */
+      margin: 0 auto;
+      width: 300px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .input-field {
+      width: 85%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .paste-btn {
+      background-color: #007bff;
+      /* Blue background for paste button */
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      position: relative;
+      right: -10px;
+      /* Trailing position inside text field */
+    }
+
+    .download-btn {
+      background-color: #007bff;
+      /* Blue background for download button */
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 100px;
+      /* Rounder border */
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <div class="input-group">
+      <input type="text" class="input-field" placeholder="Paste Youtube link here">
+      <button class="paste-btn">Paste</button>
+    </div>
+    <button class="download-btn">Download MP3</button>
+    <div style="height: 1rem;"></div>
+   
+  </div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <script>
+    const pasteBtn = document.querySelector('.paste-btn');
+    const inputField = document.querySelector('.input-field');
+
+    // pasteBtn.addEventListener('click', () => {
+    //   const text = navigator.clipboard.readText();
+    //   inputField.value = text;
+    // });
+    pasteBtn.addEventListener('click', () => {
+      navigator.clipboard.readText()
+        .then(text => {
+          inputField.value = text; // Assign the resolved text to the input field
+        })
+        .catch(err => {
+          console.error('Error reading clipboard:', err); // Handle any errors
+        });
+
+
+      const downloadBtn = document.querySelector('.download-btn');
+      const downloadBtnmp4 = document.querySelector('.download-btn-mp4');
+
+      function extractVideoId(youtubeUrl) {
+            var match;
+            var videoId;
+
+            // Match the video ID using a regular expression
+            if ((match = youtubeUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)) !== null) {
+                videoId = match[1];
+            }
+
+            return videoId;
+        }
+
+      downloadBtn.addEventListener('click', async () => {
+        const inputField = document.querySelector('.input-field');
+        // const url= inputField.value; // Get the video ID from the text field
+        const videoid = extractVideoId(inputField.value);
+        const options = {
+          method: 'GET',
+          url: 'https://youtube-mp36.p.rapidapi.com/dl',
+          params: { id: videoid },
+          headers: {
+            'X-RapidAPI-Key': 'd44553318cmsh33a7840f16bd316p1441cejsnc99b13b86ed2',
+            'X-RapidAPI-Host': 'youtube-mp36.p.rapidapi.com'
+          }
+        };
+
+        
+        try {
+          const response = await axios.request(options);
+          const fileUrl = response.data.link; // Assuming the API response contains a file link
+          const filetitle = response.data.title;
+          fetch(fileUrl)
+            .then(response => response.blob())
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              console.log(blob.type);
+              link.href = url;
+              link.download = `${filetitle}.mp3`; 
+              // console.log(link.download);// Set the filename
+              link.click();
+            });
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          // Handle errors gracefully, e.g., display an error message to the user
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>
